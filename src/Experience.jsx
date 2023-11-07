@@ -8,14 +8,12 @@ export default function Experience()
 {
 
     const pointLight = useRef()
-    const line = useRef()
-
+    const [line, setLine ] = useState(null)
     const [ray, setRay] = useState(null)
     const [innerBox, setInnerBox] = useState(null)
     const [outerBox, setOuterBox] = useState(null)
     const arrow = useRef()
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1)])
-    const lineMaterial = new THREE.LineBasicMaterial({color: 0xff0000})
+    
     const arrowHelper = new THREE.ArrowHelper(
         new THREE.Vector3(),
         new THREE.Vector3(),
@@ -25,23 +23,35 @@ export default function Experience()
 
 
     const pos = new THREE.Vector3()
+    const point1 = new THREE.Vector3(0, 0, 0)
+    const point2 = new THREE.Vector3(0, 0, 0)
 
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()])
+    const lineMaterial = new THREE.LineBasicMaterial({color: 0xff0000})
 
     useEffect(() => {
-        // line.current.geometry.attributes.position.needsUPdate = true
+        // if(line) setLine.geometry.attributes.position.needsUPdate = true
+        // console.log(line.geometry.attributes.position)
+        // line.geometry.attributes.position.needsUPdate = true
         if(!ray) return
-        console.log(ray.ray.direction)
-        console.log(innerBox)
-        const intersectinner = ray.intersectObject(innerBox)
+        const intersectInner = ray.intersectObject(innerBox)
         const intersectOuter = ray.intersectObject(outerBox)
-        console.log(intersectinner)
-        console.log(intersectOuter)
-        console.log(pos)
-        pos.copy(intersectOuter[0].point)
-        console.log(pos)
-        console.log(arrow.current)
-        arrow.current.position.copy(pos)
-    }, [innerBox, outerBox, ray, pos])
+       
+        // console.log(intersectInner[0].point)
+        // console.log(intersectOuter[0].point)
+
+        point1.copy(intersectInner[0].point)
+        point2.copy(intersectOuter[0].point)
+
+        lineGeometry.setFromPoints([point1, point2])
+        console.log(point1.x - point2.x)
+
+        // console.log(point1, point2)
+
+        pos.copy(intersectInner[0].point)
+        
+        // arrow.current.position.copy(pos)
+    }, [innerBox, outerBox, ray, pos, line])
     
     // const { scene } = useThree()
 
@@ -57,14 +67,13 @@ export default function Experience()
         />
         <mesh ref={setInnerBox} name="innerBox">
             <boxGeometry args={[1]} />
-            <meshStandardMaterial transparent={true} opacity={0.5} color={'green'}/>
-            
+            <meshStandardMaterial transparent={true} opacity={0.5} color={'green'} side={DoubleSide}/>
         </mesh>
-        <arrowHelper ref={arrow} args={[new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1.0, 0xff0000]}/>
+        {/* <arrowHelper ref={arrow} args={[new THREE.Vector3(-1, 0, 0), new THREE.Vector3(), 1.0, 0xff0000]}/> */}
         <mesh ref={setOuterBox} name="outerBox">
-            <boxGeometry args={[5, 2, 2]}/>
+            <boxGeometry args={[2, 2, 2]}/>
             <meshNormalMaterial transparent={true} opacity={0.5} color={'red'} side={DoubleSide}/>
         </mesh>
-        {/* <line ref={line} geometry={lineGeometry} material={lineMaterial}/> */}
+        <line ref={setLine} geometry={lineGeometry} material={lineMaterial}/>
     </>
 }
